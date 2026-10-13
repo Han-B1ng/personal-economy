@@ -1,6 +1,16 @@
 <script setup lang="ts">
 export type IconName =
-  'home' | 'growth' | 'analytics' | 'finance' | 'profile' | 'chevron' | 'arrow-left' | 'close'
+  | 'home'
+  | 'growth'
+  | 'analytics'
+  | 'finance'
+  | 'profile'
+  | 'chevron'
+  | 'arrow-left'
+  | 'close'
+  | 'refresh'
+  | 'check'
+  | 'arrow-up-right'
 defineProps<{ name: IconName; size?: number }>()
 const paths: Record<IconName, string> = {
   home: 'M3 11L12 3L21 11V21H15V14H9V21H3Z',
@@ -10,6 +20,9 @@ const paths: Record<IconName, string> = {
   profile: 'M4 22C4 16.67 6.67 14 12 14C17.33 14 20 16.67 20 22M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0',
   chevron: 'M9 6L15 12L9 18',
   'arrow-left': 'M15 5L8 12L15 19M8 12H22',
+  refresh: 'M20 7V3M20 7H16M20 7A8 8 0 1 0 20 16',
+  check: 'M5 12L10 17L20 7',
+  'arrow-up-right': 'M6 18L18 6M6 6H18V18',
   close: 'M6 6L18 18M18 6L6 18',
 }
 </script>

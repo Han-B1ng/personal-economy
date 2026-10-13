@@ -1,0 +1,140 @@
+/* State changes stay interruptible. Only short-lived page layers are composited. */
+.page-fade-enter-active,
+.page-forward-enter-active,
+.page-back-enter-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-standard),
+    transform var(--motion-enter) var(--ease-emphasized);
+}
+.page-fade-leave-active,
+.page-forward-leave-active,
+.page-back-leave-active {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-standard) var(--ease-standard);
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+.page-forward-enter-from {
+  opacity: 0;
+  transform: translateX(12px);
+}
+.page-forward-leave-to {
+  opacity: 0;
+  transform: translateX(-6px);
+}
+.page-back-enter-from {
+  opacity: 0;
+  transform: translateX(-12px);
+}
+.page-back-leave-to {
+  opacity: 0;
+  transform: translateX(6px);
+}
+.content-fade-enter-active,
+.content-fade-leave-active {
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+.content-fade-enter-from,
+.content-fade-leave-to {
+  opacity: 0;
+}
+.icon-button,
+.back-button,
+.filter-chip,
+.task-check {
+  transition:
+    background-color var(--motion-fast),
+    color var(--motion-fast),
+    transform var(--motion-fast) var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-button:active:not(:disabled),
+.back-button:active,
+.filter-chip:active,
+.task-check:active {
+  transform: scale(0.94);
+}
+.card-link,
+a.menu-row,
+a.list-row,
+.text-link {
+  transition:
+    background-color var(--motion-fast),
+    opacity var(--motion-fast);
+}
+.card-link:active,
+a.menu-row:active,
+a.list-row:active,
+.text-link:active {
+  opacity: 0.72;
+}
+.form-layout input,
+.form-layout textarea,
+.form-layout select {
+  transition:
+    border-color var(--motion-fast),
+    background-color var(--motion-fast);
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon-button:hover:not(:disabled),
+  .back-button:hover,
+  .task-check:hover {
+    background: var(--color-hover);
+  }
+  .card-link:hover,
+  a.menu-row:hover,
+  a.list-row:hover {
+    background: var(--color-hover);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-forward-enter-from,
+  .page-forward-leave-to,
+  .page-back-enter-from,
+  .page-back-leave-to,
+  .icon-button:active:not(:disabled),
+  .back-button:active,
+  .filter-chip:active,
+  .task-check:active {
+    transform: none;
+  }
+}
+/* Native dialog retains focus trapping and Escape handling; motion is progressive. */
+.confirm-dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+  transition:
+    opacity var(--motion-fast),
+    transform var(--motion-standard) var(--ease-emphasized),
+    display var(--motion-standard) allow-discrete,
+    overlay var(--motion-standard) allow-discrete;
+}
+.confirm-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+.confirm-dialog:not([open]) {
+  pointer-events: none;
+}
+@starting-style {
+  .confirm-dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-dialog {
+    transform: none;
+  }
+  @starting-style {
+    .confirm-dialog[open] {
+      transform: none;
+    }
+  }
+}

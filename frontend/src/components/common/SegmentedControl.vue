@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 const props = defineProps<{
   modelValue: string
   options: readonly string[]
@@ -6,6 +7,10 @@ const props = defineProps<{
   compact?: boolean
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const selectedIndex = computed(() => Math.max(0, props.options.indexOf(props.modelValue)))
+function choose(value: string) {
+  if (value !== props.modelValue) emit('update:modelValue', value)
+}
 function navigate(event: KeyboardEvent, index: number) {
   let next: number
   switch (event.key) {
@@ -29,23 +34,30 @@ function navigate(event: KeyboardEvent, index: number) {
   const value = props.options[next]
   if (!value) return
   event.preventDefault()
-  emit('update:modelValue', value)
+  choose(value)
   const buttons = (event.currentTarget as HTMLElement).parentElement?.querySelectorAll('button')
   buttons?.[next]?.focus()
 }
 </script>
 
 <template>
-  <div class="segmented-control" :class="{ compact }" role="radiogroup" :aria-label="label">
+  <div
+    class="segmented-control"
+    :class="{ compact }"
+    :style="{ '--segment-count': Math.max(1, options.length), '--active-index': selectedIndex }"
+    role="radiogroup"
+    :aria-label="label"
+  >
+    <span v-if="options.length" class="segment-indicator" aria-hidden="true" />
     <button
       v-for="(option, index) in options"
       :key="option"
       type="button"
       role="radio"
       :aria-checked="modelValue === option"
-      :tabindex="modelValue === option ? 0 : -1"
+      :tabindex="selectedIndex === index ? 0 : -1"
       :class="{ selected: modelValue === option }"
-      @click="emit('update:modelValue', option)"
+      @click="choose(option)"
       @keydown="navigate($event, index)"
     >
       {{ option }}
@@ -55,40 +67,59 @@ function navigate(event: KeyboardEvent, index: number) {
 
 <style scoped>
 .segmented-control {
-  display: flex;
-  gap: 4px;
+  --segment-gap: 4px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+  gap: var(--segment-gap);
+  isolation: isolate;
+}
+.segment-indicator {
+  position: absolute;
+  inset-block: 2px;
+  left: 0;
+  width: calc((100% - (var(--segment-count) - 1) * var(--segment-gap)) / var(--segment-count));
+  background: var(--color-accent-surface);
+  border-radius: var(--radius-input);
+  transform: translateX(calc(var(--active-index) * (100% + var(--segment-gap))));
+  transition: transform var(--motion-standard) var(--ease-emphasized);
+  pointer-events: none;
 }
 button {
-  flex: 1;
+  position: relative;
   min-width: 0;
   min-height: 44px;
   padding: 0 4px;
   background: transparent;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-input);
   color: var(--color-muted);
   font-size: 14px;
+  font-weight: 500;
   transition:
-    color var(--motion-duration),
-    background var(--motion-duration);
+    color var(--motion-fast),
+    transform var(--motion-fast) var(--ease-standard);
 }
 button.selected {
-  background: var(--color-accent-surface);
   color: var(--color-accent);
-  font-weight: 600;
+}
+button:active {
+  transform: scale(0.96);
 }
 .compact button {
   font-size: 12px;
-  position: relative;
-  isolation: isolate;
-  background: transparent;
 }
-.compact button.selected::before {
-  content: '';
-  position: absolute;
-  inset: 6px 0;
-  border-radius: 8px;
-  background: var(--color-accent-surface);
-  z-index: -1;
+.compact .segment-indicator {
+  inset-block: 6px;
+}
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(.selected) {
+    color: var(--color-text);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button:active {
+    transform: none;
+  }
 }
 </style>

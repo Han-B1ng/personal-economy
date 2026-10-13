@@ -20,7 +20,13 @@
   --radius-input: 8px;
   --radius-button: 10px;
   --radius-card: 12px;
-  --motion-duration: 180ms;
+  --motion-fast: 120ms;
+  --motion-standard: 220ms;
+  --motion-enter: 280ms;
+  --motion-duration: var(--motion-standard);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+  --color-hover: #16161c;
   --page-gutter: 24px;
   --nav-height: 64px;
 }

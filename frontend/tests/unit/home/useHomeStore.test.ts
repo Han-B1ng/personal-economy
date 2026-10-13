@@ -43,6 +43,24 @@ describe('home load states', () => {
     expect(store.snapshot?.history).toEqual([])
     expect(store.snapshot?.recentEvents).toEqual([])
   })
+  it('keeps the last successful snapshot visibly stale when a refresh fails', async () => {
+    const store = useHomeStore()
+    await store.load()
+    const previous = store.snapshot
+    const readAt = store.lastFetchedAt
+    vi.mocked(readHomeSnapshot).mockRejectedValueOnce(new Error('network unavailable'))
+    await store.load()
+    expect(store.status).toBe('error')
+    expect(store.snapshot).toBe(previous)
+    expect(store.lastFetchedAt).toBe(readAt)
+  })
+  it('clears old data when explicitly previewing a failed initial load', async () => {
+    const store = useHomeStore()
+    await store.load()
+    await store.load('error')
+    expect(store.status).toBe('error')
+    expect(store.snapshot).toBeNull()
+  })
   it('ignores stale responses when a newer request has completed', async () => {
     let failOld!: (reason?: unknown) => void
     vi.mocked(readHomeSnapshot).mockImplementationOnce(

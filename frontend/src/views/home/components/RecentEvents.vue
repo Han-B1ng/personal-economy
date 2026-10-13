@@ -13,7 +13,12 @@ defineProps<{ events: RecentGrowthEvent[] }>()
         >全部 <AppIcon name="chevron" :size="14"
       /></RouterLink>
     </div>
-    <p v-if="!events.length" class="empty-events">暂无成长事件</p>
+    <div v-if="!events.length" class="empty-events">
+      <span>还没有成长事件</span
+      ><RouterLink to="/growth/events/new" class="text-link"
+        >记录第一条成长事件 <AppIcon name="chevron" :size="14"
+      /></RouterLink>
+    </div>
     <ul v-else>
       <li v-for="event in events" :key="event.id">
         <RouterLink :to="`/growth/events/${event.id}`" class="event-row">
@@ -24,7 +29,10 @@ defineProps<{ events: RecentGrowthEvent[] }>()
           >
           <span
             class="event-contribution"
-            :class="{ negative: event.contribution !== null && event.contribution < 0 }"
+            :class="{
+              negative: event.contribution !== null && event.contribution < 0,
+              pending: event.contribution === null,
+            }"
             ><span class="sr-only">演示指数贡献 </span
             >{{ event.contribution === null ? '待评估' : signed(event.contribution) }}</span
           >
@@ -65,7 +73,12 @@ ul {
 .event-row {
   display: flex;
   align-items: center;
-  min-height: 47px;
+  min-height: 60px;
+  padding: 6px 0;
+  border-radius: 8px;
+  transition:
+    background-color var(--motion-fast),
+    opacity var(--motion-fast);
   gap: 12px;
   color: var(--color-text);
   text-decoration: none;
@@ -93,9 +106,12 @@ ul {
   font-size: 14px;
   font-weight: 500;
   line-height: 21px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .event-date {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-muted);
   line-height: 16px;
 }
@@ -126,5 +142,34 @@ li + li::before {
   color: var(--color-muted);
   font-size: 14px;
   padding: 16px 0;
+}
+
+.event-contribution.pending {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.empty-events {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 16px;
+}
+.all-events :deep(svg) {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+@media (hover: hover) and (pointer: fine) {
+  .event-row:hover {
+    background: var(--color-hover);
+  }
+  .all-events:hover :deep(svg) {
+    transform: translateX(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .all-events:hover :deep(svg) {
+    transform: none;
+  }
 }
 </style>

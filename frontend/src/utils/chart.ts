@@ -1,6 +1,15 @@
 import type { ChartPeriod, IndexPoint } from '@/types/home'
 
 const day = 86_400_000
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'UTC',
+})
+const indexFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
 export function filterHistory(history: readonly IndexPoint[], period: ChartPeriod): IndexPoint[] {
   const last = history.at(-1)
   if (!last) return []
@@ -46,14 +55,7 @@ export function nearestPoint(points: readonly IndexPoint[], ratio: number): numb
 }
 
 export function shortDate(timestamp: number) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: 'UTC',
-  }).format(timestamp)
+  return dateFormatter.format(timestamp)
 }
-export const formatIndex = (value: number) =>
-  new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
-    value,
-  )
+export const formatIndex = (value: number) => indexFormatter.format(value)
 export const signed = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}`

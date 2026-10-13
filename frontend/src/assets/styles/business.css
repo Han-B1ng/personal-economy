@@ -27,7 +27,11 @@
   padding: 0;
   display: flex;
   align-items: center;
-  margin-top: -32px;
+  margin-top: -8px;
+  min-width: 44px;
+  justify-content: center;
+  margin-left: -12px;
+  border-radius: var(--radius-input);
   margin-bottom: 12px;
 }
 .text-link {

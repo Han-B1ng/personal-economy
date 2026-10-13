@@ -29,4 +29,19 @@ describe('shared controls', () => {
     await selected.trigger('keydown', { key: 'ArrowRight' })
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['1D'])
   })
+  it('does not emit a redundant change when the active period is pressed again', async () => {
+    const wrapper = mount(SegmentedControl, {
+      props: { modelValue: '1M', options: ['1D', '1M'], label: '周期' },
+    })
+    await wrapper.findAll('button')[1]!.trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+  it('keeps a keyboard entry point if a choice is removed', () => {
+    const wrapper = mount(SegmentedControl, {
+      props: { modelValue: 'removed', options: ['目标', '待办'], label: '成长' },
+    })
+    expect(
+      wrapper.findAll('button').filter((button) => button.attributes('tabindex') === '0'),
+    ).toHaveLength(1)
+  })
 })

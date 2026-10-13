@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { nextTick } from 'vue'
 import MobileLayout from '@/layout/MobileLayout.vue'
 
 const growthList = () => import('@/views/growth/GrowthListPage.vue')
@@ -6,6 +7,17 @@ const growthForm = () => import('@/views/growth/GrowthFormPage.vue')
 const growthDetail = () => import('@/views/growth/GrowthDetailPage.vue')
 const result = () => import('@/views/growth/ResultPage.vue')
 const flow = { hideNavigation: true }
+
+const tabScroll = new Map<string, number>()
+const primaryPages = new Set([
+  '/',
+  '/growth/goals',
+  '/growth/tasks',
+  '/growth/events',
+  '/analytics',
+  '/finance',
+  '/profile',
+])
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -158,7 +170,15 @@ export const router = createRouter({
       meta: { title: '工程连接检查' },
     },
   ],
-  scrollBehavior: (_to, _from, saved) => saved || { top: 0 },
+  async scrollBehavior(to, from, saved) {
+    await nextTick()
+    if (saved) return saved
+    if (to.path === from.path) return false
+    return { top: primaryPages.has(to.path) ? tabScroll.get(to.path) || 0 : 0 }
+  },
+})
+router.beforeEach((_to, from) => {
+  if (primaryPages.has(from.path)) tabScroll.set(from.path, window.scrollY)
 })
 router.afterEach((to) => {
   document.title = `${String(to.meta.title || '首页')} · Personal Economy`
