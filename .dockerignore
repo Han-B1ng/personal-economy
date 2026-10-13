@@ -1,0 +1,11 @@
+**
+!frontend/
+!frontend/dist/
+!frontend/dist/**
+!backend/
+!backend/target/
+!backend/target/personal-economy-backend-0.1.0-SNAPSHOT.jar
+!deploy/
+!deploy/frontend/
+!deploy/frontend/Caddyfile
+!deploy/frontend/entrypoint.sh

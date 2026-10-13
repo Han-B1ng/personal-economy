@@ -25,3 +25,6 @@
 
 # Python startup helper cache
 __pycache__/
+
+# Private deployment credentials, generated only by the operator.
+/deploy/secrets/

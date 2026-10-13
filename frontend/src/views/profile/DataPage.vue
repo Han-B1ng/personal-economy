@@ -16,11 +16,11 @@ function exportData() {
   link.download = 'personal-economy-workspace.json'
   link.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-  message.value = '本地工作区已导出'
+  message.value = '当前工作区已导出'
 }
 </script>
 <template>
-  <PageHeader title="数据管理" back="/profile" subtitle="导出本地工作区备份" /><WorkspaceGate
+  <PageHeader title="数据管理" back="/profile" subtitle="导出当前工作区快照" /><WorkspaceGate
     ><p class="info-note">
       导出文件包含个人资料、目标、待办、成长事件、分类、收支和手动资产快照。请妥善保存个人数据。
     </p>

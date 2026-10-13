@@ -3,7 +3,7 @@ import type { Workspace, WorkspaceMutation } from '@/types/workspace'
 function validate(value: Workspace) {
   if (
     !value ||
-    !['local-demo', 'local-mysql'].includes(value.source) ||
+    !['local-demo', 'local-mysql', 'preview-mysql'].includes(value.source) ||
     !value.profile ||
     !value.assets ||
     !['goals', 'tasks', 'events', 'categories', 'financeRecords'].every((key) =>

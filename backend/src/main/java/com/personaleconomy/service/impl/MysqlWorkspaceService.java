@@ -31,6 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class MysqlWorkspaceService extends AbstractWorkspaceService {
     private final WorkspaceMapper sql;
     private final String userId;
+    private final String workspaceSource;
     private final Path importFile;
     private final TransactionTemplate writeTransaction;
     private final TransactionTemplate readTransaction;
@@ -38,10 +39,12 @@ public class MysqlWorkspaceService extends AbstractWorkspaceService {
     public MysqlWorkspaceService(ObjectMapper mapper, WorkspaceMapper sql,
             PlatformTransactionManager transactionManager,
             @Value("${personal-economy.local-user-id}") String userId,
-            @Value("${personal-economy.data-file}") String importFile) {
+            @Value("${personal-economy.data-file}") String importFile,
+            @Value("${personal-economy.workspace-source:local-mysql}") String workspaceSource) {
         super(mapper);
         this.sql = sql;
         this.userId = userId;
+        this.workspaceSource = workspaceSource;
         this.importFile = Path.of(importFile).toAbsolutePath().normalize();
         writeTransaction = new TransactionTemplate(transactionManager);
         readTransaction = new TransactionTemplate(transactionManager);
@@ -93,7 +96,7 @@ public class MysqlWorkspaceService extends AbstractWorkspaceService {
         var profile = sql.selectUser(userId);
         var stock = sql.selectStock(userId);
         var assets = sql.selectAssets(userId);
-        return new WorkspaceVO("local-mysql", state.updatedAt().toString(),
+        return new WorkspaceVO(workspaceSource, state.updatedAt().toString(),
                 new WorkspaceVO.Profile(profile.nickname(), stock.stockCode(), profile.bio(), profile.avatar()),
                 convert(sql.selectGoals(userId), WorkspaceVO.Goal.class),
                 convert(sql.selectTasks(userId), WorkspaceVO.Task.class),

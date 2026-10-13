@@ -1,0 +1,20 @@
+# Private single-workspace review deployment; product account authentication is not implemented.
+spring:
+  config:
+    import: configtree:/run/secrets/
+server:
+  address: 0.0.0.0
+  tomcat:
+    threads:
+      max: 24
+      min-spare: 4
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+personal-economy:
+  preview-proxy-token: ${PE_PREVIEW_TOKEN}
+  preview-origin: ${PE_PREVIEW_ORIGIN}
+  workspace-source: preview-mysql
+  data-file: /app/data/workspace.json

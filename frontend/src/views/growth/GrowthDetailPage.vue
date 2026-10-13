@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useWorkspace } from '@/hooks/useWorkspace'
 import { categoryName, displayDate } from '@/utils/display'
@@ -14,6 +14,10 @@ const route = useRoute(),
   store = useWorkspace(),
   confirm = ref(false),
   error = ref('')
+let mounted = true
+onBeforeUnmount(() => {
+  mounted = false
+})
 const kind = computed(() => String(route.meta.kind)),
   id = computed(() => String(route.params.id)),
   title = computed(() => ({ goals: '目标', tasks: '待办', events: '成长事件' })[kind.value])
@@ -25,25 +29,31 @@ const goal = computed(() => (kind.value === 'goals' ? (item.value as Goal) : und
   event = computed(() => (kind.value === 'events' ? (item.value as GrowthEvent) : undefined))
 const relatedTasks = computed(() => store.data?.tasks.filter((t) => t.goalId === id.value) || [])
 async function action() {
+  if (store.saving) return
+  const originPath = route.fullPath
   error.value = ''
   try {
     if (goal.value) {
       await store.save(`/goals/${id.value}/complete`, 'POST')
-      router.push(`/growth/goals/${id.value}/completed`)
+      if (mounted && route.fullPath === originPath)
+        await router.push(`/growth/goals/${id.value}/completed`)
     } else if (task.value) {
       await store.save(`/tasks/${id.value}/status`, 'PATCH', { completed: !task.value.completed })
-      router.push(`/growth/tasks/${id.value}/completed`)
+      if (mounted && route.fullPath === originPath)
+        await router.push(`/growth/tasks/${id.value}/completed`)
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : '操作失败'
   }
 }
 async function remove() {
+  if (store.saving) return
+  const originPath = route.fullPath
   error.value = ''
   try {
     await store.save(`/${kind.value}/${id.value}`, 'DELETE')
     confirm.value = false
-    router.push(`/growth/${kind.value}`)
+    if (mounted && route.fullPath === originPath) await router.push(`/growth/${kind.value}`)
   } catch (e) {
     error.value = e instanceof Error ? e.message : '删除失败'
     confirm.value = false
@@ -95,7 +105,16 @@ async function remove() {
           <div class="meta-row">
             <span>当前手动进度</span><strong class="accent">{{ goal.progress }}%</strong>
           </div>
-          <div class="progress-track"><span :style="{ width: goal.progress + '%' }" /></div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-label="目标手动进度"
+            :aria-valuenow="goal.progress"
+            :aria-valuemin="0"
+            :aria-valuemax="100"
+          >
+            <span :style="{ width: goal.progress + '%' }" />
+          </div>
           <p class="info-note">
             待办完成率：{{ relatedTasks.filter((t) => t.completed).length }} /
             {{ relatedTasks.length }}，与手动进度独立。
@@ -137,7 +156,16 @@ async function remove() {
       <template v-if="event"
         ><div class="card">
           <p class="muted">{{ event.contribution === null ? '指数评估' : '模拟指数影响' }}</p>
-          <p class="large-number positive">
+          <p
+            class="large-number"
+            :class="
+              event.contribution === null
+                ? 'muted'
+                : event.contribution < 0
+                  ? 'negative'
+                  : 'positive'
+            "
+          >
             {{ event.contribution === null ? '待评估' : signed(event.contribution) }}
           </p>
           <p class="info-note">
@@ -159,14 +187,21 @@ async function remove() {
       >
       <p v-if="error" class="form-error" role="alert">{{ error }}</p>
       <div class="button-stack">
-        <AppButton variant="secondary" @click="router.push(`/growth/${kind}/${id}/edit`)"
+        <AppButton
+          variant="secondary"
+          :disabled="store.saving"
+          @click="router.push(`/growth/${kind}/${id}/edit`)"
           >编辑{{ title }}</AppButton
         ><AppButton
           v-if="goal?.status !== 'COMPLETED' && (goal || task)"
           :loading="store.saving"
           @click="action"
           >{{ task?.completed ? '撤销完成' : '标记完成' }}</AppButton
-        ><AppButton v-if="task || event" variant="secondary" @click="confirm = true"
+        ><AppButton
+          v-if="task || event"
+          variant="secondary"
+          :disabled="store.saving"
+          @click="confirm = true"
           >删除{{ title }}</AppButton
         >
       </div>

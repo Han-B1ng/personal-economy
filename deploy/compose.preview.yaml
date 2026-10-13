@@ -1,0 +1,99 @@
+name: personal-economy-preview
+x-logging: &bounded-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+services:
+  mysql:
+    image: personal-economy/mysql:${RELEASE_TAG:?Set RELEASE_TAG}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+    environment:
+      MYSQL_DATABASE: personal_economy
+      MYSQL_USER: pe_app
+      MYSQL_PASSWORD_FILE: /run/secrets/DB_PASSWORD
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/MYSQL_ROOT_PASSWORD
+    secrets: [DB_PASSWORD, MYSQL_ROOT_PASSWORD]
+    command:
+      - --innodb-buffer-pool-size=128M
+      - --innodb-redo-log-capacity=64M
+      - --max-connections=20
+      - --performance-schema=OFF
+      - --table-open-cache=256
+      - --table-definition-cache=400
+      - --tmp-table-size=16M
+      - --max-heap-table-size=16M
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [database]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/MYSQL_ROOT_PASSWORD) mysql -h 127.0.0.1 -u root -Nse 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+    logging: *bounded-logging
+  backend:
+    image: personal-economy/backend:${RELEASE_TAG:?Set RELEASE_TAG}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 640m
+    cpus: 0.8
+    read_only: true
+    tmpfs: [/tmp:size=64m,mode=1777]
+    environment:
+      SPRING_PROFILES_ACTIVE: preview
+      DB_URL: jdbc:mysql://mysql:3306/personal_economy?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+      DB_USERNAME: pe_app
+      PE_PREVIEW_ORIGIN: ${PE_PREVIEW_ORIGIN:?Set HTTPS preview origin}
+      JAVA_TOOL_OPTIONS: -Xms96m -Xmx320m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=64m -XX:MaxDirectMemorySize=32m -Xss512k -XX:+ExitOnOutOfMemoryError
+    secrets: [DB_PASSWORD, PE_PREVIEW_TOKEN]
+    networks: [database, gateway]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"'
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    logging: *bounded-logging
+  frontend:
+    image: personal-economy/frontend:${RELEASE_TAG:?Set RELEASE_TAG}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 96m
+    cpus: 0.2
+    environment:
+      PREVIEW_USER: ${PREVIEW_USER:-reviewer}
+    secrets: [PE_PREVIEW_TOKEN, PREVIEW_PASSWORD_HASH]
+    ports:
+      - "127.0.0.1:${PE_HTTP_PORT:-8088}:80"
+    networks: [gateway]
+    depends_on:
+      backend:
+        condition: service_healthy
+    logging: *bounded-logging
+secrets:
+  DB_PASSWORD:
+    file: ./secrets/DB_PASSWORD
+  MYSQL_ROOT_PASSWORD:
+    file: ./secrets/MYSQL_ROOT_PASSWORD
+  PE_PREVIEW_TOKEN:
+    file: ./secrets/PE_PREVIEW_TOKEN
+  PREVIEW_PASSWORD_HASH:
+    file: ./secrets/PREVIEW_PASSWORD_HASH
+volumes:
+  mysql_data:
+networks:
+  database:
+    internal: true
+  gateway:
+    internal: true

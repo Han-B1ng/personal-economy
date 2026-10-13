@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /** Restricts the unauthenticated single-user review adapter to local requests. */
 @Component
-@Profile("(bootstrap | mysql) & !prod")
+@Profile("(bootstrap | mysql) & !prod & !preview")
 public class LocalReviewFilter extends OncePerRequestFilter {
     private static final Set<String> HOSTS=Set.of("localhost","127.0.0.1","::1","[::1]");
     private final ObjectMapper mapper;

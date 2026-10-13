@@ -9,17 +9,21 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     loading = ref(false),
     saving = ref(false),
     error = ref('')
+  let savedVersion = 0
   let activeLoad: Promise<void> | undefined
   async function load(force = false) {
     if (activeLoad) return activeLoad
     if (data.value && !force) return
     loading.value = true
     error.value = ''
+    const loadVersion = savedVersion
     activeLoad = (async () => {
       try {
-        data.value = await fetchWorkspace()
+        const snapshot = await fetchWorkspace()
+        // A read started before a successful write must not overwrite its returned snapshot.
+        if (loadVersion === savedVersion) data.value = snapshot
       } catch (e) {
-        error.value = e instanceof Error ? e.message : '加载失败'
+        if (loadVersion === savedVersion) error.value = e instanceof Error ? e.message : '加载失败'
       } finally {
         loading.value = false
         activeLoad = undefined
@@ -33,6 +37,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     error.value = ''
     try {
       const result = await mutateWorkspace(path, method, body)
+      savedVersion += 1
       data.value = result.snapshot
       useHomeStore().status = 'idle'
       return result.affectedId

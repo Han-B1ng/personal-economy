@@ -4,6 +4,7 @@ spring:
     group:
       dev: mysql
       prod: mysql
+      preview: mysql
   application:
     name: personal-economy-backend
   jackson:

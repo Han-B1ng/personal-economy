@@ -1,0 +1,30 @@
+{
+    admin off
+    auto_https off
+}
+:80 {
+    basic_auth {
+        {$PREVIEW_USER} {$PREVIEW_PASSWORD_HASH}
+    }
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy same-origin
+    }
+    handle /api/* {
+        header Cache-Control no-store
+        reverse_proxy backend:8080 {
+            header_up X-PE-Review-Token {env.PE_PREVIEW_TOKEN}
+            header_up -Authorization
+        }
+    }
+    handle /actuator/* {
+        respond 404
+    }
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

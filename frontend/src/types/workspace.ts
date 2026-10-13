@@ -57,7 +57,7 @@ export interface Assets {
   updatedAt: string
 }
 export interface Workspace {
-  source: 'local-demo' | 'local-mysql'
+  source: 'local-demo' | 'local-mysql' | 'preview-mysql'
   updatedAt: string
   profile: Profile
   goals: Goal[]
