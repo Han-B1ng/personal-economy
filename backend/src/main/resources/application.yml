@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: personal-economy-backend
+  profiles:
+    default: bootstrap
+  jackson:
+    time-zone: UTC
+  flyway:
+    enabled: false
+
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
