@@ -1,0 +1,26 @@
+:root {
+  --color-background: #000000;
+  --color-surface: #101014;
+  --color-surface-raised: #18181e;
+  --color-text: #f5f5f7;
+  --color-muted: #94949e;
+  --color-subtle: #60606a;
+  --color-nav: #71717a;
+  --color-border: #222228;
+  --color-accent: #a59cff;
+  --color-accent-surface: #252135;
+  --color-positive: #32d583;
+  --color-error: #ff453a;
+  --font-body: 'Inter Tight Variable', 'Noto Sans SC Variable', sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --radius-input: 8px;
+  --radius-button: 10px;
+  --radius-card: 12px;
+  --motion-duration: 180ms;
+  --page-gutter: 24px;
+  --nav-height: 64px;
+}

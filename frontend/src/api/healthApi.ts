@@ -1,4 +1,4 @@
-import { apiGet, ApiError } from './client'
+import { apiGet, ApiError } from '@/api/httpClient'
 
 export interface ServiceHealth {
   status: 'UP'

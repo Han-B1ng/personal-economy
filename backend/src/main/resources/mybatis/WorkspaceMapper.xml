@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.personaleconomy.mapper.WorkspaceMapper">
+  <select id="selectUser" resultType="com.personaleconomy.entity.UserEntity">
+    SELECT nickname, bio, avatar FROM app_user WHERE id = #{userId}
+  </select>
+  <select id="selectStock" resultType="com.personaleconomy.entity.StockEntity">
+    SELECT stock_code FROM personal_stock WHERE user_id = #{userId}
+  </select>
+  <select id="selectState" resultType="com.personaleconomy.entity.WorkspaceStateEntity">
+    SELECT initialized, updated_at FROM workspace_state WHERE user_id = #{userId}
+  </select>
+  <select id="lockState" resultType="com.personaleconomy.entity.WorkspaceStateEntity">
+    SELECT initialized, updated_at FROM workspace_state WHERE user_id = #{userId} FOR UPDATE
+  </select>
+  <select id="selectAssets" resultType="com.personaleconomy.entity.AssetSnapshotEntity">
+    SELECT cash, other, debt, updated_at FROM asset_snapshot WHERE user_id = #{userId} ORDER BY id DESC LIMIT 1
+  </select>
+  <insert id="insertUserIfAbsent">
+    INSERT INTO app_user (id, nickname, bio, avatar) VALUES (#{userId}, #{row.nickname}, #{row.bio}, #{row.avatar})
+    ON DUPLICATE KEY UPDATE id = id
+  </insert>
+  <insert id="insertStateIfAbsent">
+    INSERT INTO workspace_state (user_id) VALUES (#{userId}) ON DUPLICATE KEY UPDATE user_id = user_id
+  </insert>
+  <update id="updateUser">
+    UPDATE app_user SET nickname = #{row.nickname}, bio = #{row.bio}, avatar = #{row.avatar} WHERE id = #{userId}
+  </update>
+  <insert id="insertStock">
+    INSERT INTO personal_stock (user_id, stock_code) VALUES (#{userId}, #{row.stockCode})
+  </insert>
+  <insert id="insertAssets">
+    INSERT INTO asset_snapshot (user_id, cash, other, debt, updated_at)
+    VALUES (#{userId}, #{row.cash}, #{row.other}, #{row.debt}, #{row.updatedAt})
+  </insert>
+  <update id="finishImport">
+    UPDATE workspace_state SET initialized = TRUE, imported_from = #{source}, updated_at = #{updatedAt} WHERE user_id = #{userId}
+  </update>
+  <update id="updateTimestamp">
+    UPDATE workspace_state SET updated_at = #{updatedAt} WHERE user_id = #{userId}
+  </update>
+  <delete id="deleteTask">DELETE FROM growth_task WHERE user_id = #{userId} AND id = #{id}</delete>
+  <delete id="deleteEvent">DELETE FROM growth_event WHERE user_id = #{userId} AND id = #{id}</delete>
+  <select id="selectGoals" resultType="com.personaleconomy.entity.GoalEntity">
+    SELECT id, title, category_id, description, start_date, due_date, progress, status, completed_date FROM growth_goal WHERE user_id = #{userId} ORDER BY id
+  </select>
+  <insert id="upsertGoal">
+    INSERT INTO growth_goal (user_id, id, title, category_id, description, start_date, due_date, progress, status, completed_date) VALUES (#{userId}, #{row.id}, #{row.title}, #{row.categoryId}, #{row.description}, #{row.startDate}, #{row.dueDate}, #{row.progress}, #{row.status}, #{row.completedDate})
+    ON DUPLICATE KEY UPDATE title = #{row.title}, category_id = #{row.categoryId}, description = #{row.description}, start_date = #{row.startDate}, due_date = #{row.dueDate}, progress = #{row.progress}, status = #{row.status}, completed_date = #{row.completedDate}
+  </insert>
+  <select id="selectTasks" resultType="com.personaleconomy.entity.TaskEntity">
+    SELECT id, title, description, due_date, due_time, priority, goal_id, completed FROM growth_task WHERE user_id = #{userId} ORDER BY id
+  </select>
+  <insert id="upsertTask">
+    INSERT INTO growth_task (user_id, id, title, description, due_date, due_time, priority, goal_id, completed) VALUES (#{userId}, #{row.id}, #{row.title}, #{row.description}, #{row.dueDate}, #{row.dueTime}, #{row.priority}, #{row.goalId}, #{row.completed})
+    ON DUPLICATE KEY UPDATE title = #{row.title}, description = #{row.description}, due_date = #{row.dueDate}, due_time = #{row.dueTime}, priority = #{row.priority}, goal_id = #{row.goalId}, completed = #{row.completed}
+  </insert>
+  <select id="selectEvents" resultType="com.personaleconomy.entity.GrowthEventEntity">
+    SELECT id, title, category_id, description, event_date AS `date`, importance, source_goal_id, evaluation_status, contribution FROM growth_event WHERE user_id = #{userId} ORDER BY id
+  </select>
+  <insert id="upsertEvent">
+    INSERT INTO growth_event (user_id, id, title, category_id, description, event_date, importance, source_goal_id, evaluation_status, contribution) VALUES (#{userId}, #{row.id}, #{row.title}, #{row.categoryId}, #{row.description}, #{row.date}, #{row.importance}, #{row.sourceGoalId}, #{row.evaluationStatus}, #{row.contribution})
+    ON DUPLICATE KEY UPDATE title = #{row.title}, category_id = #{row.categoryId}, description = #{row.description}, event_date = #{row.date}, importance = #{row.importance}, source_goal_id = #{row.sourceGoalId}, evaluation_status = #{row.evaluationStatus}, contribution = #{row.contribution}
+  </insert>
+  <select id="selectCategories" resultType="com.personaleconomy.entity.EventCategoryEntity">
+    SELECT id, name, `system`, active FROM event_category WHERE user_id = #{userId} ORDER BY id
+  </select>
+  <insert id="insertCategory">
+    INSERT INTO event_category (user_id, id, name, `system`, active)
+    VALUES (#{userId}, #{row.id}, #{row.name}, #{row.system}, #{row.active})
+  </insert>
+  <update id="updateCategory">
+    UPDATE event_category SET name = #{row.name}, `system` = #{row.system}, active = #{row.active}
+    WHERE user_id = #{userId} AND id = #{row.id}
+  </update>
+  <select id="selectFinanceRecords" resultType="com.personaleconomy.entity.FinanceRecordEntity">
+    SELECT id, type, amount, category, record_date AS `date`, note FROM finance_record WHERE user_id = #{userId} ORDER BY id
+  </select>
+  <insert id="upsertFinanceRecord">
+    INSERT INTO finance_record (user_id, id, type, amount, category, record_date, note) VALUES (#{userId}, #{row.id}, #{row.type}, #{row.amount}, #{row.category}, #{row.date}, #{row.note})
+    ON DUPLICATE KEY UPDATE type = #{row.type}, amount = #{row.amount}, category = #{row.category}, record_date = #{row.date}, note = #{row.note}
+  </insert>
+</mapper>

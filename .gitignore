@@ -20,3 +20,8 @@
 /PERSONAL_ECONOMY_DESIGN_HANDOFF.md
 /UI_INTERACTION_POLISH.md
 /PROJECT_TRACKING.md
+/data/
+/backend/data/
+
+# Python startup helper cache
+__pycache__/

@@ -1,6 +1,8 @@
 package com.personaleconomy.common.exception;
 
 import com.personaleconomy.common.response.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,10 +37,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ApiResponse.error(code, message), headers, status);
     }
 
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ApiResponse<Void>> duplicate(DuplicateKeyException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("CONFLICT", "记录或分类名称已存在，请刷新后重试"));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> constraint(DataIntegrityViolationException exception) {
+        log.warn("Workspace persistence constraint rejected a write", exception);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("DATA_CONFLICT", "数据约束不满足，请检查关联记录和输入值"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> unexpected(Exception exception) {
         log.error("Unhandled request failure", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("INTERNAL_ERROR", "服务暂时不可用"));
+    }
+
+    @ExceptionHandler(WorkspaceException.class)
+    public ResponseEntity<ApiResponse<Void>> workspace(WorkspaceException exception) {
+        return ResponseEntity.status(exception.status())
+                .body(ApiResponse.error(exception.status().name(), exception.getMessage()));
     }
 }

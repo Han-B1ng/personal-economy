@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiGet, ApiError } from './client'
-import { getHealth } from './health'
+import { apiGet, ApiError } from '@/api/httpClient'
+import { getHealth } from '@/api/healthApi'
 
 afterEach(() => vi.unstubAllGlobals())
 

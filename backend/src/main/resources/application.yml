@@ -1,8 +1,11 @@
 spring:
+  profiles:
+    default: dev
+    group:
+      dev: mysql
+      prod: mysql
   application:
     name: personal-economy-backend
-  profiles:
-    default: bootstrap
   jackson:
     time-zone: UTC
   flyway:
@@ -23,3 +26,7 @@ management:
   endpoint:
     health:
       show-details: never
+
+personal-economy:
+  data-file: ${PE_DATA_FILE:data/workspace.json}
+  local-user-id: ${PE_LOCAL_USER_ID:local-review-user}

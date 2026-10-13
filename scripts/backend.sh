@@ -11,5 +11,6 @@ if ! "$java_bin" -version 2>&1 | head -n 1 | grep -Eq 'version "17\.'; then
   exit 1
 fi
 export MAVEN_USER_HOME="$project_root/.cache/maven-user"
+export PE_DATA_FILE="${PE_DATA_FILE:-$project_root/data/workspace.json}"
 cd "$project_root/backend"
 exec ./mvnw -B -ntp "-Dmaven.repo.local=$project_root/.cache/maven" "$@"

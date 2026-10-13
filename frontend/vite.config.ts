@@ -1,4 +1,5 @@
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 
@@ -9,8 +10,9 @@ export default defineConfig(({ mode }) => {
   }
   return {
     plugins: [vue()],
+    resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     server: { host: '127.0.0.1', port: 5173, strictPort: true, proxy },
     preview: { host: '127.0.0.1', port: 4173, strictPort: true, proxy },
-    test: { environment: 'jsdom', include: ['src/**/*.test.ts'] },
+    test: { environment: 'jsdom', include: ['tests/unit/**/*.test.ts'] },
   }
 })

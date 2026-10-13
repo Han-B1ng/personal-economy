@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { getHealth } from '../shared/api/health'
+import { getHealth } from '@/api/healthApi'
 
 const pending = ref(false)
 const connected = ref(false)
@@ -37,7 +37,7 @@ onUnmounted(() => request?.abort())
   <main class="bootstrap">
     <p class="eyebrow">DEVELOPMENT</p>
     <h1>Personal Economy</h1>
-    <p>前端工程已就绪。这是工程连通检查页，产品页面将在后续开发。</p>
+    <p>这里用于检查 API 服务连接，不代表业务功能已经验收。</p>
     <section class="connection" aria-labelledby="connection-title" :aria-busy="pending">
       <h2 id="connection-title">服务连接</h2>
       <p role="status" aria-live="polite" :class="{ connected, error: !connected && !pending }">

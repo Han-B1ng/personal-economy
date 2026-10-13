@@ -1,0 +1,230 @@
+{
+  "source": "local-demo",
+  "updatedAt": "2026-10-12T00:00:00Z",
+  "profile": {
+    "nickname": "Han_B1ng",
+    "stockCode": "PE001",
+    "bio": "如果人生也有一张走势图。\n记录学习、项目与生活中的成长。",
+    "avatar": ""
+  },
+  "categories": [
+    {
+      "id": "cat-0",
+      "name": "学习",
+      "system": true,
+      "active": true
+    },
+    {
+      "id": "cat-1",
+      "name": "技能",
+      "system": true,
+      "active": true
+    },
+    {
+      "id": "cat-2",
+      "name": "职业",
+      "system": true,
+      "active": true
+    },
+    {
+      "id": "cat-3",
+      "name": "项目",
+      "system": true,
+      "active": true
+    },
+    {
+      "id": "cat-4",
+      "name": "经济",
+      "system": true,
+      "active": true
+    },
+    {
+      "id": "cat-5",
+      "name": "目标",
+      "system": true,
+      "active": true
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal-project",
+      "title": "完成 Java 全栈项目",
+      "categoryId": "cat-3",
+      "description": "完成前后端开发、测试与部署，交付一个可演示的全栈项目。",
+      "startDate": "2026-10-12",
+      "dueDate": "2026-12-20",
+      "progress": 65,
+      "status": "ACTIVE",
+      "completedDate": null
+    },
+    {
+      "id": "goal-english",
+      "title": "通过英语六级",
+      "categoryId": "cat-0",
+      "description": "坚持阅读与听力训练，完成本阶段的学习目标。",
+      "startDate": "2026-10-12",
+      "dueDate": "2027-06-15",
+      "progress": 40,
+      "status": "ACTIVE",
+      "completedDate": null
+    },
+    {
+      "id": "goal-savings",
+      "title": "阶段性储蓄目标",
+      "categoryId": "cat-4",
+      "description": "完成阶段性储蓄计划。",
+      "startDate": "2026-09-12",
+      "dueDate": "2026-10-03",
+      "progress": 100,
+      "status": "COMPLETED",
+      "completedDate": "2026-10-03"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-login",
+      "title": "完成 Spring Boot 登录接口",
+      "description": "完成登录与退出接口，添加参数校验，并补齐接口说明。",
+      "dueDate": "2026-10-12",
+      "dueTime": "18:00",
+      "priority": "重要",
+      "goalId": "goal-project",
+      "completed": false
+    },
+    {
+      "id": "task-profile",
+      "title": "整理个人资料",
+      "description": "整理个人资料。",
+      "dueDate": "2026-10-12",
+      "dueTime": "20:00",
+      "priority": "普通",
+      "goalId": null,
+      "completed": false
+    },
+    {
+      "id": "task-notes",
+      "title": "整理 MySQL 学习笔记",
+      "description": "整理数据库学习内容。",
+      "dueDate": "2026-10-15",
+      "dueTime": "18:00",
+      "priority": "普通",
+      "goalId": "goal-project",
+      "completed": false
+    },
+    {
+      "id": "task-setup",
+      "title": "搭建项目基础结构",
+      "description": "搭建前后端项目基础结构。",
+      "dueDate": "2026-10-10",
+      "dueTime": "18:00",
+      "priority": "普通",
+      "goalId": "goal-project",
+      "completed": true
+    }
+  ],
+  "events": [
+    {
+      "id": "demo-cet4",
+      "title": "通过英语四级",
+      "categoryId": "cat-0",
+      "description": "完成 12 周英语学习计划，通过英语四级考试。坚持每天阅读与听力训练，完成本阶段的学习目标。",
+      "date": "2026-10-12",
+      "importance": "重要",
+      "sourceGoalId": null,
+      "evaluationStatus": "DEMO",
+      "contribution": 18.5
+    },
+    {
+      "id": "demo-project",
+      "title": "完成软件开发项目",
+      "categoryId": "cat-3",
+      "description": "完成软件开发项目。",
+      "date": "2026-10-08",
+      "importance": "重要",
+      "sourceGoalId": null,
+      "evaluationStatus": "DEMO",
+      "contribution": 15.26
+    },
+    {
+      "id": "demo-savings",
+      "title": "达成储蓄目标",
+      "categoryId": "cat-4",
+      "description": "完成阶段性储蓄计划。",
+      "date": "2026-10-03",
+      "importance": "普通",
+      "sourceGoalId": "goal-savings",
+      "evaluationStatus": "DEMO",
+      "contribution": 8
+    },
+    {
+      "id": "demo-internship",
+      "title": "获得实习机会",
+      "categoryId": "cat-2",
+      "description": "获得实习机会。",
+      "date": "2026-09-25",
+      "importance": "重要",
+      "sourceGoalId": null,
+      "evaluationStatus": "DEMO",
+      "contribution": 24
+    },
+    {
+      "id": "demo-typescript",
+      "title": "完成 TypeScript 学习",
+      "categoryId": "cat-1",
+      "description": "完成 TypeScript 学习。",
+      "date": "2026-09-18",
+      "importance": "普通",
+      "sourceGoalId": null,
+      "evaluationStatus": "DEMO",
+      "contribution": 12
+    }
+  ],
+  "financeRecords": [
+    {
+      "id": "record-work",
+      "type": "INCOME",
+      "amount": 1500,
+      "category": "工作收入",
+      "date": "2026-10-12",
+      "note": "周末兼职收入"
+    },
+    {
+      "id": "record-subsidy",
+      "type": "INCOME",
+      "amount": 7000,
+      "category": "工作收入",
+      "date": "2026-10-08",
+      "note": "实习补贴"
+    },
+    {
+      "id": "record-food",
+      "type": "EXPENSE",
+      "amount": 32,
+      "category": "餐饮",
+      "date": "2026-10-12",
+      "note": "日常午餐"
+    },
+    {
+      "id": "record-transit",
+      "type": "EXPENSE",
+      "amount": 6,
+      "category": "交通",
+      "date": "2026-10-11",
+      "note": "地铁通勤"
+    },
+    {
+      "id": "record-book",
+      "type": "EXPENSE",
+      "amount": 89,
+      "category": "学习",
+      "date": "2026-10-10",
+      "note": "技术书籍"
+    }
+  ],
+  "assets": {
+    "cash": 49000,
+    "other": 19000,
+    "debt": 15700,
+    "updatedAt": "2026-10-12T00:00:00Z"
+  }
+}

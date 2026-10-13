@@ -1,0 +1,205 @@
+{
+  "source": "demo",
+  "nickname": "Han_B1ng",
+  "stockCode": "PE001",
+  "index": 1284.68,
+  "change": 41.76,
+  "changePercent": 3.36,
+  "history": [
+    {
+      "timestamp": 1789171200000,
+      "value": 1000
+    },
+    {
+      "timestamp": 1789232914286,
+      "value": 1013
+    },
+    {
+      "timestamp": 1789294628571,
+      "value": 1007
+    },
+    {
+      "timestamp": 1789356342857,
+      "value": 1020
+    },
+    {
+      "timestamp": 1789418057143,
+      "value": 1014
+    },
+    {
+      "timestamp": 1789479771429,
+      "value": 1032
+    },
+    {
+      "timestamp": 1789541485714,
+      "value": 1021
+    },
+    {
+      "timestamp": 1789603200000,
+      "value": 1051
+    },
+    {
+      "timestamp": 1789664914286,
+      "value": 1042
+    },
+    {
+      "timestamp": 1789726628571,
+      "value": 1059
+    },
+    {
+      "timestamp": 1789788342857,
+      "value": 1049
+    },
+    {
+      "timestamp": 1789850057143,
+      "value": 1055
+    },
+    {
+      "timestamp": 1789911771429,
+      "value": 1078
+    },
+    {
+      "timestamp": 1789973485714,
+      "value": 1063
+    },
+    {
+      "timestamp": 1790035200000,
+      "value": 1081
+    },
+    {
+      "timestamp": 1790096914286,
+      "value": 1110
+    },
+    {
+      "timestamp": 1790158628571,
+      "value": 1096
+    },
+    {
+      "timestamp": 1790220342857,
+      "value": 1106
+    },
+    {
+      "timestamp": 1790282057143,
+      "value": 1083
+    },
+    {
+      "timestamp": 1790343771429,
+      "value": 1101
+    },
+    {
+      "timestamp": 1790405485714,
+      "value": 1126
+    },
+    {
+      "timestamp": 1790467200000,
+      "value": 1118
+    },
+    {
+      "timestamp": 1790528914286,
+      "value": 1137
+    },
+    {
+      "timestamp": 1790590628571,
+      "value": 1125
+    },
+    {
+      "timestamp": 1790652342857,
+      "value": 1152
+    },
+    {
+      "timestamp": 1790714057143,
+      "value": 1145
+    },
+    {
+      "timestamp": 1790775771429,
+      "value": 1176
+    },
+    {
+      "timestamp": 1790837485714,
+      "value": 1162
+    },
+    {
+      "timestamp": 1790899200000,
+      "value": 1181
+    },
+    {
+      "timestamp": 1790960914286,
+      "value": 1169
+    },
+    {
+      "timestamp": 1791022628571,
+      "value": 1203
+    },
+    {
+      "timestamp": 1791084342857,
+      "value": 1189
+    },
+    {
+      "timestamp": 1791146057143,
+      "value": 1214
+    },
+    {
+      "timestamp": 1791207771429,
+      "value": 1200
+    },
+    {
+      "timestamp": 1791269485714,
+      "value": 1237
+    },
+    {
+      "timestamp": 1791331200000,
+      "value": 1219
+    },
+    {
+      "timestamp": 1791392914286,
+      "value": 1249
+    },
+    {
+      "timestamp": 1791454628571,
+      "value": 1241
+    },
+    {
+      "timestamp": 1791516342857,
+      "value": 1266
+    },
+    {
+      "timestamp": 1791578057143,
+      "value": 1252
+    },
+    {
+      "timestamp": 1791639771429,
+      "value": 1278
+    },
+    {
+      "timestamp": 1791701485714,
+      "value": 1261
+    },
+    {
+      "timestamp": 1791763200000,
+      "value": 1284.68
+    }
+  ],
+  "recentEvents": [
+    {
+      "id": "demo-cet4",
+      "title": "通过英语四级",
+      "date": "2026-10-12",
+      "categoryMark": "证",
+      "contribution": 18.5
+    },
+    {
+      "id": "demo-project",
+      "title": "完成软件开发项目",
+      "date": "2026-10-08",
+      "categoryMark": "码",
+      "contribution": 15.26
+    },
+    {
+      "id": "demo-savings",
+      "title": "达成储蓄目标",
+      "date": "2026-10-03",
+      "categoryMark": "财",
+      "contribution": 8
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Real production authentication/persistence is not implemented yet.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
