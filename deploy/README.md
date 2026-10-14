@@ -2,6 +2,73 @@
 
 操作者逐步执行；本文件不会自动连接服务器。这是单个共享工作区的内测环境，入口密码不是产品账号体系。真实注册、用户隔离与正式生产模式尚未完成。所有接口经过入口 Basic Auth；浏览器通过 Tailscale HTTPS 访问。
 
+## 推荐：从 GitHub 发布镜像
+
+GitHub 的 Publish preview images 工作流在 main 上相关代码更新时运行，也可以在 Actions 页面手动 Run workflow。完成前端 lint/构建与 Java 打包后，发布三个 Linux AMD64 镜像到 GHCR。完整测试套件不自动运行；不会连接或启动 S1。所有 Actions 固定到提交版本。
+
+每次运行使用源码提交、运行编号和重试次数组成独立发布标签。仅当三份镜像全部发布成功并完成 Compose 校验，才交付小型配置附件 `preview-deploy-<run-id>-<attempt>`；附件中的 Compose 固定镜像 digest，`release.json` 记录版本。数据库密码和网关令牌不进入附件或镜像。
+
+### G1. 确认仓库可达与下载配置
+
+在 S1 检查仓库接口（GET，不携带令牌；401 通常说明接口可达）：
+
+```bash
+curl --connect-timeout 10 --max-time 20 -sS -o /dev/null -w '%{http_code}\n' https://ghcr.io/v2/
+```
+
+接口响应不代表镜像层下载成功，后续 pull 才是实际验证。新 GHCR 包默认可能是私有；公开 GitHub 仓库不等于公开镜像。由用户确认包可见性，助手不自动修改。私有镜像在 S1 执行 `sudo docker login ghcr.io -u Han-B1ng`，在交互 Password 提示中输入具有 read:packages 的个人访问令牌；不要将令牌写在命令参数或聊天中。若用户决定公开镜像，需在 GitHub Packages 对三份包设置 Public，再验证匿名拉取。
+
+在 Mac 下载成功运行的配置附件：
+
+```bash
+gh run download <run-id> --repo Han-B1ng/personal-economy --name preview-deploy-<run-id>-<attempt> --dir .cache/server-preview-<run-id>
+COPYFILE_DISABLE=1 tar -czf .cache/server-preview-<run-id>.tar.gz -C .cache/server-preview-<run-id> .
+scp .cache/server-preview-<run-id>.tar.gz ubuntu@100.79.89.116:/tmp/
+```
+
+也可在 GitHub Actions 运行详情下载附件。附件只有配置，不含镜像；不要把旧的不完整大包继续用于安装。
+
+### G2. 首次部署（用户在 S1 执行）
+
+先检查 `ss -lntp`、`tailscale serve status` 和 `/opt/personal-economy`。上一轮失败解包可能留下部分文件：先检查有无 `.env`、`secrets`、容器及数据库卷，不要直接覆盖。若确认仅是未启动的失败解包目录，可由操作者将旧目录改名留存，再建立新的目录；有已有数据库/凭据时按更新步骤处理。
+
+在确认新目录可用后：
+
+```bash
+sudo mkdir /opt/personal-economy
+sudo tar -xzf /tmp/server-preview-<run-id>.tar.gz -C /opt/personal-economy
+cd /opt/personal-economy
+sha256sum -c SHA256SUMS
+sudo cp .env.example .env
+sudo docker compose -f compose.preview.yaml config --quiet
+sudo docker compose -f compose.preview.yaml pull
+sudo python3 init-preview.py
+sudo docker compose -f compose.preview.yaml up -d --wait --wait-timeout 300
+sudo docker compose -f compose.preview.yaml ps
+```
+
+先 pull 再初始化：这样不会因镜像不可达而留下已生成但未使用的凭据。确认 `.env` 中 HTTPS Origin 与实际入口一致。配置校验不证明服务能启动，容器健康不代表完整业务验收。
+
+新目录生成凭据后，给其他主机用户限制配置读取权限：
+
+```bash
+sudo chmod 700 /opt/personal-economy
+```
+
+此后非 root 操作者检查文件需加 sudo。Docker 中的文件挂载仍能读取指定 secret。
+
+确认入口401、启动状态和资源占用后，按本文第5节由用户开启独立 Tailscale 8443入口并验收。现有443与 Hermes保持原样。
+
+### G3. 后续版本更新
+
+先按备份章节做数据库备份并保管 secrets。下载指定成功运行的配置附件，核对 release.json 与 SHA256SUMS，保留旧部署配置。更新 Compose（新附件固定新 digest），保留 `.env` 的入口和用户名及现有 secrets，不重新生成数据库密码；同步更新 `.env` 的 PE_IMAGE_PREFIX 与 RELEASE_TAG，然后手动 pull 与 up。不要直接把新 `.env.example` 覆盖为现有 `.env`。
+
+停服务不会删除数据库卷。镜像回滚使用保留的旧 Compose 配置；迁移兼容性需单独审核，不声称换回镜像即可回滚数据库。
+
+## 离线备用方式
+
+下列方式保留用于镜像仓库不可达时，由操作者明确选择后使用。
+
 ## 1. 在 Mac 项目根目录打包
 
 ```bash

@@ -17,6 +17,9 @@ for line in (root / ".env").read_text().splitlines():
 tag = settings.get("RELEASE_TAG", "")
 if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", tag) or tag == "CHANGE_ME":
     raise SystemExit("请先在 .env 中设置发布包对应的 RELEASE_TAG")
+prefix = settings.get("PE_IMAGE_PREFIX", "personal-economy")
+if not re.fullmatch(r"[a-z0-9][a-z0-9./:_-]*", prefix):
+    raise SystemExit("PE_IMAGE_PREFIX 格式无效")
 directory = root / "secrets"
 if directory.exists():
     raise SystemExit("secrets 已存在；为避免数据库密码失配，本脚本不会覆盖。请核对现有文件。")
@@ -27,7 +30,7 @@ if password != getpass.getpass("再输入一次："):
     raise SystemExit("两次密码不同，未创建文件")
 result = subprocess.run([
     "docker", "run", "--rm", "-i", "--network", "none", "--entrypoint", "caddy",
-    f"personal-economy/frontend:{tag}", "hash-password"
+    f"{prefix}/frontend:{tag}", "hash-password"
 ], input=password + "\n", text=True, capture_output=True, check=True)
 hashed = result.stdout.strip()
 if not hashed.startswith(("$2a$", "$2b$", "$2y$")):

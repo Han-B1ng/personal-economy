@@ -1,0 +1,135 @@
+name: Publish preview images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-preview.yml'
+      - 'backend/**'
+      - 'frontend/src/**'
+      - 'frontend/public/**'
+      - 'frontend/package*.json'
+      - 'frontend/*config*'
+      - 'deploy/**'
+      - 'scripts/backend.sh'
+      - 'scripts/create-preview-bundle.py'
+      - '.dockerignore'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Compile and check frontend
+        working-directory: frontend
+        env:
+          VITE_HOME_DATA_SOURCE: api
+          VITE_API_BASE_URL: /api/v1
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+      - name: Package backend (tests remain for user acceptance)
+        run: bash scripts/backend.sh clean package -DskipTests
+      - name: Determine immutable release reference
+        id: release
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          image_prefix="ghcr.io/${REPOSITORY,,}"
+          release_tag="sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "prefix=$image_prefix" >> "$GITHUB_OUTPUT"
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish backend
+        id: backend
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: deploy/backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.release.outputs.prefix }}/backend:${{ steps.release.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Publish frontend gateway
+        id: frontend
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: deploy/frontend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.release.outputs.prefix }}/frontend:${{ steps.release.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Publish MySQL runtime
+        id: mysql
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: deploy/mysql/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.release.outputs.prefix }}/mysql:${{ steps.release.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Assemble small deployment bundle
+        env:
+          PE_IMAGE_PREFIX: ${{ steps.release.outputs.prefix }}
+          PE_RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          BACKEND_DIGEST: ${{ steps.backend.outputs.digest }}
+          FRONTEND_DIGEST: ${{ steps.frontend.outputs.digest }}
+          MYSQL_DIGEST: ${{ steps.mysql.outputs.digest }}
+        run: |
+          python3 scripts/create-preview-bundle.py
+          {
+            echo "## Private preview publication"
+            echo "Source commit: $GITHUB_SHA"
+            echo "Image prefix: $PE_IMAGE_PREFIX"
+            echo "Release tag: $PE_RELEASE_TAG"
+            echo "Download preview-deploy-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT for deployment configuration."
+            echo "Build/lint/configuration checks only; test suites and server deployment were not executed."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate Compose bundle
+        working-directory: .cache/preview-bundle
+        run: docker compose --env-file .env.example -f compose.preview.yaml config --quiet
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: preview-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/preview-bundle/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
