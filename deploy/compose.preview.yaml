@@ -43,7 +43,8 @@ services:
     mem_limit: 640m
     cpus: 0.8
     read_only: true
-    tmpfs: [/tmp:size=64m,mode=1777]
+    tmpfs:
+      - "/tmp:size=64m,mode=1777"
     environment:
       SPRING_PROFILES_ACTIVE: preview
       DB_URL: jdbc:mysql://mysql:3306/personal_economy?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
