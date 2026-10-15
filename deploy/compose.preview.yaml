@@ -77,7 +77,7 @@ services:
     secrets: [PE_PREVIEW_TOKEN, PREVIEW_PASSWORD_HASH]
     ports:
       - "127.0.0.1:${PE_HTTP_PORT:-8088}:80"
-    networks: [gateway]
+    networks: [gateway, edge]
     depends_on:
       backend:
         condition: service_healthy
@@ -98,3 +98,5 @@ networks:
     internal: true
   gateway:
     internal: true
+  edge:
+    driver: bridge

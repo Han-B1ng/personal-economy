@@ -131,6 +131,11 @@ jobs:
           from pathlib import PurePosixPath
           config = json.load(sys.stdin)
           for name, service in config["services"].items():
+              if service.get("ports") and not any(
+                  not config["networks"][network].get("internal", False)
+                  for network in service.get("networks", {})
+              ):
+                  raise SystemExit(f"Published service {name} needs a non-internal bridge")
               for mount in service.get("tmpfs", []):
                   if not PurePosixPath(mount.split(":", 1)[0]).is_absolute():
                       raise SystemExit(f"Invalid tmpfs mount in {name}: {mount}")
