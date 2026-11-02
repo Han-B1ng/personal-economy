@@ -1,0 +1,46 @@
+name: PR quality checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Build and lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check and build frontend
+        working-directory: frontend
+        env:
+          VITE_HOME_DATA_SOURCE: api
+          VITE_API_BASE_URL: /api/v1
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+      - name: Package backend without running test suites
+        run: bash scripts/backend.sh clean package -DskipTests
+      - name: Summarize verification scope
+        run: |
+          echo "Frontend lint/type/build and backend packaging only. Test suites, image publication, deployment, and business acceptance were not performed." >> "$GITHUB_STEP_SUMMARY"
